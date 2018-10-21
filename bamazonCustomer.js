@@ -1,6 +1,7 @@
 // import dependencies
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+const asTable = require('as-table');
 
 // connect database
 const db = mysql.createConnection({
@@ -17,20 +18,21 @@ const db = mysql.createConnection({
 // turn on database connection
 db.connect(function (err) {
   if (err) throw err;
-  console.log("connected as id " + db.threadId);
+  // console.log("connected as id " + db.threadId);
   showProducts();
 });
 
 const showProducts = () => {
-  const query = db.query("SELECT * FROM products", (err, products) => {
+  const query = db.query("SELECT item_id, product_name, price FROM products", (err, products) => {
     if (err) throw err;
-    products.forEach(product => {
-      console.log(`${product.item_id}: ${product.product_name} costs $ ${product.price}`);
-    });
+    console.log(asTable.configure({ right: true })(products));
+    // products.forEach(product => {
+    //   console.log(`${product.item_id}: ${product.product_name} costs $ ${product.price}`);
+    // });
     inquirer.prompt([
       {
         name: "productId",
-        message: "Enter the product id you wish to purchase.",
+        message: "Enter the item id you wish to purchase:",
         type: "input",
         validate: function (productId) {
           if (!isNaN(productId)) {
@@ -42,7 +44,7 @@ const showProducts = () => {
       },
       {
         name: "quantity",
-        message: "Enter how many of the product you wish to purchase.",
+        message: "Enter how many of the product you wish to purchase:",
         type: "input",
         validate: function (quantity) {
           if (!isNaN(quantity)) {
@@ -66,37 +68,42 @@ const showProducts = () => {
     })
   });
   // logs the actual query being run
-  console.log(query.sql);
+  // console.log(query.sql);
 };
 
 const checkOrder = (productId, quantity) => {
   const query = db.query("SELECT * FROM products WHERE item_id = ?", [productId], (err, products) => {
     if (err) throw err;
-    if (products.lenght >= 1) {
+    // console.log(products[0]);
+    if (products[0] === undefined) {
+      console.log(`
+${productId} is no longer available. Please select an available product.
+`);
+      showProducts();
+    } else {
       let newQuantity = parseInt(products[0].stock_quantity) - parseInt(quantity);
       if (newQuantity >= 0) {
         updateQuantity(productId, newQuantity);
       } else {
-        console.log(`Insufficient quantity!`);
+        console.log(`
+Insufficient quantity in stock!
+`);
         showProducts();
       }
-    } else {
-      console.log(`
-${productId} is not a valid product. Please select an available product.
-`);
-      showProducts();
     }
   });
   // logs the actual query being run
-  console.log(query.sql);
+  // console.log(query.sql);
 };
 
 const updateQuantity = (productId, newQuantity) => {
   const query = db.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?", [newQuantity, productId], (err, response) => {
     if (err) throw err;
-    console.log(response.affectedRows + " product updated!\n");
+    console.log(`
+${response.affectedRows} product added to your order.
+`);
     showProducts();
   });
   // logs the actual query being run
-  console.log(query.sql);
+  // console.log(query.sql);
 }
