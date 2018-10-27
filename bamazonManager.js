@@ -18,14 +18,27 @@ const db = mysql.createConnection({
 // turn on database connection
 db.connect(function (err) {
   if (err) throw err;
-  console.log("connected as id " + db.threadId);
-  mainPrompt();
+  // console.log("connected as id " + db.threadId);
+  getDepartments();
 });
 
 // define variables
-const departmentList = ["Appliances", "Computers", "Electronics", "Furniture", "Health & Fitness", "Household", "Tools"];
+// const departmentList = ["Appliances", "Computers", "Electronics", "Furniture", "Health & Fitness", "Household", "Tools"];
+let departmentList = [];
 
 // define functions
+const getDepartments = () => {
+  const query = db.query("SELECT department_name FROM departments ORDER BY department_name", (err, departments) => {
+    if (err) throw err;
+    // console.log(departments);
+    departmentList = departments.map(x => x.department_name);
+    // console.log(departmentList);
+    mainPrompt();
+  });
+  // logs the actual query being run
+  // console.log(query.sql);
+};
+
 const mainPrompt = () => {
   inquirer.prompt([
     {
@@ -33,7 +46,6 @@ const mainPrompt = () => {
       message: "What would you like to do?",
       type: "list",
       choices: ["View Products", "View Low Inventory", "Add to Inventory", "Add New Product", "Exit"],
-      default: "Songs by artist"
     }
   ]).then(userResp => {
     switch (userResp.userPick) {
@@ -64,7 +76,7 @@ const viewProducts = () => {
     mainPrompt();
   });
   // logs the actual query being run
-  console.log(query.sql);
+  // console.log(query.sql);
 };
 
 const lowInventory = () => {
@@ -76,7 +88,7 @@ const lowInventory = () => {
     mainPrompt();
   });
   // logs the actual query being run
-  console.log(query.sql);
+  // console.log(query.sql);
 };
 
 const addInventory = () => {
@@ -127,7 +139,7 @@ const updateInventory = (productId, quantity) => {
     // console.log(products[0]);
     if (products[0] === undefined) {
       console.log(`
-${productId} is no longer available. Add product if needed.
+${productId} is no longer available. Add the product if needed.
 `);
       mainPrompt();
     } else {
@@ -148,7 +160,7 @@ ${response.affectedRows} stock_quantity update.
     mainPrompt();
   });
   // logs the actual query being run
-  console.log(query.sql);
+  // console.log(query.sql);
 }
 
 const addProduct = () => {
@@ -212,6 +224,6 @@ const addProduct = () => {
       }
     );
     // logs the actual query being run
-    console.log(query.sql);
+    // console.log(query.sql);
   });
 };

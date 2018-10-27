@@ -83,7 +83,10 @@ ${productId} is no longer available. Please select an available product.
     } else {
       let newQuantity = parseInt(products[0].stock_quantity) - parseInt(quantity);
       if (newQuantity >= 0) {
-        updateQuantity(productId, newQuantity);
+        let oldSales = parseFloat(products[0].product_sales);
+        if (isNaN(oldSales)) { oldSales = 0 };
+        let newSales = oldSales + (parseFloat(products[0].price) * parseInt(quantity));
+        updateQuantity(productId, newQuantity, newSales);
       } else {
         console.log(`
 Insufficient quantity in stock!
@@ -96,8 +99,8 @@ Insufficient quantity in stock!
   // console.log(query.sql);
 };
 
-const updateQuantity = (productId, newQuantity) => {
-  const query = db.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?", [newQuantity, productId], (err, response) => {
+const updateQuantity = (productId, newQuantity, newSales) => {
+  const query = db.query("UPDATE products SET stock_quantity = ?, product_sales = ? WHERE item_id = ?", [newQuantity, newSales, productId], (err, response) => {
     if (err) throw err;
     console.log(`
 ${response.affectedRows} product added to your order.
