@@ -25,10 +25,9 @@ db.connect(function (err) {
 const showProducts = () => {
   const query = db.query("SELECT item_id, product_name, price FROM products", (err, products) => {
     if (err) throw err;
+    console.log("");
     console.log(asTable.configure({ right: true })(products));
-    // products.forEach(product => {
-    //   console.log(`${product.item_id}: ${product.product_name} costs $ ${product.price}`);
-    // });
+    console.log("");
     inquirer.prompt([
       {
         name: "productId",

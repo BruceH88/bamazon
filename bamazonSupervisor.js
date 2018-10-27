@@ -53,7 +53,7 @@ const viewSales = () => {
     mainPrompt();
   });
   // logs the actual query being run
-  console.log(query.sql);
+  // console.log(query.sql);
 };
 
 const addDepartment = () => {
@@ -96,6 +96,6 @@ const addDepartment = () => {
       }
     );
     // logs the actual query being run
-    console.log(query.sql);
+    // console.log(query.sql);
   });
 };
